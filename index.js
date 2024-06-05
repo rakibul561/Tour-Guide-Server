@@ -2,6 +2,7 @@
 const express = require('express');
 const app = express();
 const cors = require('cors')
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -33,12 +34,39 @@ async function run() {
         const menuCollection = client.db("tourUser").collection("menu");
         const userCollection = client.db("tourUser").collection("users");
 
-        //    users relative api 
 
-        app.get('/users', async (req, res) => {
+        // jwt relative api
+        app.post('/jwt', async (req, res) => {
+            const user = req.body;
+            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+            res.send({ token });
+        })
+
+        // verified token 
+        const verifyToken = (req, res, next) => {
+            console.log('inside verify token', req.headers.authorization);
+            if(!req.headers.authorization){
+                return res.status(401).send({message:'forbiden-access'})
+            }
+            const token = req.headers.authorization.split(' ')[1]
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
+                if(err){
+                    return res.status(401).send({message:'forbiden access'})
+                }
+                req.decoded = decoded;
+                 next();
+            })
+           
+        }
+
+        // users relative api 
+        app.get('/users', verifyToken, async (req, res) => {
+            console.log(req.headers);
             const result = await userCollection.find().toArray();
             res.send(result);
         });
+
+        
 
 
         app.post('/users', async (req, res) => {
@@ -53,17 +81,21 @@ async function run() {
         })
 
         app.patch('/users/admin/:id', async (req, res) => {
+            const { role } = req.body;
             const id = req.params.id;
-            const filter = { _id: new ObjectId(id) }
+            const filter = { _id: new ObjectId(id) };
             const updatedDoc = {
                 $set: {
-                    role: 'admin',
-                    role: 'Tour Guide'
+                    role: role,
                 }
+            };
+            try {
+                const result = await userCollection.updateOne(filter, updatedDoc);
+                res.send(result);
+            } catch (error) {
+                res.status(500).send({ message: 'Failed to update role', error });
             }
-            const result = await userCollection.updateOne(filter, updatedDoc);
-            res.send(result)
-        })
+        });
 
 
 
