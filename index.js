@@ -156,9 +156,16 @@ async function run() {
 
 
         // menu relative api 
+
         app.get('/menu', async (req, res) => {
             const result = await menuCollection.find().toArray();
             res.send(result)
+        })
+
+        app.post('/menu', async(req, res)=>{
+            const item = req.body;
+            const result = await menuCollection.insertOne(item);
+            res.send(result);
         })
 
         // cart details pagse
