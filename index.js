@@ -67,14 +67,30 @@ async function run() {
             }
             next();
         }
+           
+        // verifyToken, verifyAdmin,
+
 
         // users relative api 
-        app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+        app.get('/users', verifyToken,  async (req, res) => {
             console.log(req.headers);
             const result = await userCollection.find().toArray();
             res.send(result);
         });
-        
+
+        // guide detyails pagse 
+
+        app.get('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+
+            const options = {
+                projection: { name: 1, email: 1, role:1, photo: 1, },
+            }
+            const result = await userCollection.findOne(query, options);
+            res.send(result)
+        })
+
 
         app.get('/users/admin/:email', verifyToken, verifyAdmin, async (req, res) => {
             const email = req.params.email;
@@ -131,12 +147,13 @@ async function run() {
 
 
 
-        app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
+        app.delete('/users/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await userCollection.deleteOne(query);
             res.send(result)
         })
+
 
         // menu relative api 
         app.get('/menu', async (req, res) => {
