@@ -30,6 +30,7 @@ async function run() {
 
         const menuCollection = client.db("tourUser").collection("menu");
         const userCollection = client.db("tourUser").collection("users");
+        const bookingCollection = client.db("tourUser").collection("booking");
 
 
         // jwt relative api
@@ -180,7 +181,27 @@ async function run() {
             const result = await menuCollection.findOne(query, options);
             res.send(result)
         })
+       
 
+
+        // booking retetive api 
+      
+        app.get('/booking', async (req, res)=>{
+            let query = {};
+            if(req.query?.email){
+                query = {email: req.query.email}
+            }
+            const result = await bookingCollection.find(query).toArray();
+            res.send(result)
+        })
+        
+
+        app.post('/booking', async (req , res)=>{
+            const booking = req.body;
+            const result = await bookingCollection.insertOne(booking);
+            res.send(result);
+
+        })
 
 
 
