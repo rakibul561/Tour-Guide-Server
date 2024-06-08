@@ -31,6 +31,7 @@ async function run() {
         const menuCollection = client.db("tourUser").collection("menu");
         const userCollection = client.db("tourUser").collection("users");
         const bookingCollection = client.db("tourUser").collection("booking");
+        const storysCollection = client.db("tourUser").collection("storys");
 
 
         // jwt relative api
@@ -68,12 +69,12 @@ async function run() {
             }
             next();
         }
-           
+
         // verifyToken, verifyAdmin,
 
 
         // users relative api 
-        app.get('/users', verifyToken,  async (req, res) => {
+        app.get('/users', verifyToken, async (req, res) => {
             console.log(req.headers);
             const result = await userCollection.find().toArray();
             res.send(result);
@@ -86,7 +87,7 @@ async function run() {
             const query = { _id: new ObjectId(id) }
 
             const options = {
-                projection: { name: 1, email: 1, role:1, photo: 1, },
+                projection: { name: 1, email: 1, role: 1, photo: 1, },
             }
             const result = await userCollection.findOne(query, options);
             res.send(result)
@@ -127,7 +128,20 @@ async function run() {
             }
             const result = await userCollection.insertOne(user);
             res.send(result)
+        });
+
+
+        // story reletive api 
+        app.post('/storys', async (req, res) => {
+            const story = req.body;
+            console.log(story);
+            const result = await storysCollection.insertOne(story);
+            res.send(result)
         })
+
+
+
+
 
         app.patch('/users/admin/:id', async (req, res) => {
             const { role } = req.body;
@@ -163,7 +177,7 @@ async function run() {
             res.send(result)
         })
 
-        app.post('/menu', async(req, res)=>{
+        app.post('/menu', async (req, res) => {
             const item = req.body;
             const result = await menuCollection.insertOne(item);
             res.send(result);
@@ -181,32 +195,36 @@ async function run() {
             const result = await menuCollection.findOne(query, options);
             res.send(result)
         })
-       
-//    this is 
+
+        //    this is 
 
         // booking retetive api 
-      
-        app.get('/booking', async (req, res)=>{
-            let query = {};
-            if(req.query?.email){
-                query = {email: req.query.email}
+
+        app.get('/booking/:email', async (req, res) => {
+            const email = req.params.email
+            if (email) {
+                query = { email: email }
             }
+            console.log(email);
             const result = await bookingCollection.find(query).toArray();
             res.send(result)
+            console.log(result);
         })
-        
 
-        app.post('/booking', async (req , res)=>{
+
+        app.post('/booking', async (req, res) => {
             const booking = req.body;
             const result = await bookingCollection.insertOne(booking);
             res.send(result);
 
         })
 
+        // whislist reletive api
 
-        app.delete('/booking/:id', async(req, res) =>{
+
+        app.delete('/booking/:id', async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await bookingCollection.deleteOne(query);
             res.send(result);
         })
