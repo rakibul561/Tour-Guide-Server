@@ -32,6 +32,7 @@ async function run() {
         const userCollection = client.db("tourUser").collection("users");
         const bookingCollection = client.db("tourUser").collection("booking");
         const storysCollection = client.db("tourUser").collection("storys");
+        const wishlistCollection = client.db("tourUser").collection("wishlist");
 
 
         // jwt relative api
@@ -220,6 +221,25 @@ async function run() {
         })
 
         // whislist reletive api
+        app.post("/wishlist", async (req, res) => {
+            const wishlists = req.body;
+            // console.log(wishlists);
+            delete wishlists._id;
+            const result = await wishlistCollection.insertOne(wishlists);
+            res.send(result);
+        });
+
+
+        // 
+        app.get("/wishlist/:email", async (req, res) => {
+            const email = req.params.email;
+            if (email) {
+                query = { email: email }
+            }
+            console.log(email);
+            const result = await wishlistCollection.find(query).toArray();
+            res.send(result);
+        });
 
 
         app.delete('/booking/:id', async (req, res) => {
