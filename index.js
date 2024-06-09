@@ -221,25 +221,43 @@ async function run() {
         })
 
         // whislist reletive api
+
+        app.get('/wishlist', async (req, res) => {
+            const result = await wishlistCollection.find().toArray();
+            res.send(result)
+        })
+
         app.post("/wishlist", async (req, res) => {
-            const wishlists = req.body;
-            // console.log(wishlists);
-            delete wishlists._id;
-            const result = await wishlistCollection.insertOne(wishlists);
+            const wishlist = req.body;
+            //  delete wishlist._id;
+            const result = await wishlistCollection.insertOne(wishlist);
             res.send(result);
         });
-
-
         // 
-        app.get("/wishlist/:email", async (req, res) => {
+        app.get("/loveitem/:email", async (req, res) => {
             const email = req.params.email;
-            if (email) {
-                query = { email: email }
-            }
-            console.log(email);
+            const query = { "user.email": email };
             const result = await wishlistCollection.find(query).toArray();
             res.send(result);
-        });
+          });
+
+        app.get('/wishlis/:id', async (req, res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const result = await wishlistCollection.findOne(query);
+            res.send(result)
+        })
+
+
+
+        // wishlist relative delelate api 
+        app.delete('/wishlist/:id', async (req, res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const result = await wishlistCollection.deleteOne(query);
+            res.send(result)
+        })
+        
 
 
         app.delete('/booking/:id', async (req, res) => {
