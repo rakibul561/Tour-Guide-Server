@@ -229,6 +229,11 @@ async function run() {
 
        
 
+
+
+
+
+
         // whislist reletive api
 
         app.get('/wishlist', async (req, res) => {
@@ -238,24 +243,30 @@ async function run() {
 
         app.post("/wishlist", async (req, res) => {
             const wishlist = req.body;
-            //  delete wishlist._id;
+             delete wishlist._id;
             const result = await wishlistCollection.insertOne(wishlist);
             res.send(result);
         });
         // 
-        app.get("/loveitem/:email", async (req, res) => {
+        app.get("/wishlist/:email", async (req, res) => {
             const email = req.params.email;
-            const query = { "user.email": email };
+            if (email) {
+                query = { email: email }
+            }
             const result = await wishlistCollection.find(query).toArray();
             res.send(result);
           });
+        
 
-        app.get('/wishlis/:id', async (req, res)=>{
+        //   wishlist details api 
+        app.get('/heart/:id', async (req, res)=>{
             const id = req.params.id;
             const query = {_id: new ObjectId(id)}
             const result = await wishlistCollection.findOne(query);
             res.send(result)
         })
+
+
 
 
 
@@ -267,7 +278,6 @@ async function run() {
             res.send(result)
         })
         
-
 
         app.delete('/booking/:id', async (req, res) => {
             const id = req.params.id;
